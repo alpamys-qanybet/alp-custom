@@ -1,0 +1,27 @@
+{
+  "name": "alp-custom",
+  "homepage": "https://github.com/alpamys-qanybet/alp-custom",
+  "authors": [
+    "Alpamys Qanybet (Kanibetov) <alpamys.kanibetov@gmail.com>"
+  ],
+  "description": "custom angular directives",
+  "main": "alp-custom.config.js",
+  "keywords": [
+    "custom",
+    "angular",
+    "directive",
+    "breadcrumb",
+    "hierarchy",
+    "hierarchial",
+    "tree",
+    "dictionary"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
