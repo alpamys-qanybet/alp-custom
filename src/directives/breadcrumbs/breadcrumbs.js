@@ -5,14 +5,14 @@
     function() {
       return {
         restrict: "EA",
-        templateUrl: function($element, $attrs) {
-          return $attrs.templateUrl || '../bower_components/alp-custom/src/dist/breadcrumbs/breadcrumbs.html';
+        templateUrl: function(elm, attrs) {
+          return attrs.templateUrl || '../bower_components/alp-custom/src/dist/breadcrumbs/breadcrumbs.html';
         },
         scope: {
           'fetch': '&',
           'list': '='
         },
-        controller: function($scope, $element) {},
+        controller: ["$scope", "$element", function($scope, $element) {}],
         link: function(scope, elm, attrs) {
           var init;
           init = function() {

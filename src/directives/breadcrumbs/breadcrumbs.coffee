@@ -1,13 +1,14 @@
 angular.module('alpCustom').directive "breadcrumbs", [()->
 	restrict: "EA"
-	templateUrl: ($element, $attrs)->
-		$attrs.templateUrl or '../bower_components/alp-custom/src/dist/breadcrumbs/breadcrumbs.html'
+	templateUrl: (elm, attrs)->
+		attrs.templateUrl or '../bower_components/alp-custom/src/dist/breadcrumbs/breadcrumbs.html'
 	scope:
 		'fetch': '&'
 		'list': '='
 	
-	controller: ($scope, $element)->
-		
+	controller: ["$scope", "$element", ($scope, $element)->
+	]
+	
 	link: (scope, elm, attrs)->
 		init = ->
 			scope.list = []
