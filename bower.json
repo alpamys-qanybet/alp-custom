@@ -5,7 +5,7 @@
     "Alpamys Qanybet (Kanibetov) <alpamys.kanibetov@gmail.com>"
   ],
   "description": "custom angular directives",
-  "main": "alp-custom.config.js",
+  "main": "main.js",
   "keywords": [
     "custom",
     "angular",
