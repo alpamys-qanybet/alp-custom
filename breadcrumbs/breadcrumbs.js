@@ -8,7 +8,7 @@
       return {
         restrict: "EA",
         templateUrl: function($element, $attrs) {
-          return $attrs.templateUrl || 'scripts/directives/breadcrumbs/breadcrumbs.html';
+          return $attrs.templateUrl || '../bower_components/alp-custom/breadcrumbs/breadcrumbs.html';
         },
         scope: {
           'fetch': '&',

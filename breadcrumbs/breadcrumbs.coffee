@@ -3,7 +3,7 @@ angular.module('alpCustom', [])
 angular.module('alpCustom').directive "breadcrumbs", [()->
 	restrict: "EA"
 	templateUrl: ($element, $attrs)->
-		$attrs.templateUrl or 'scripts/directives/breadcrumbs/breadcrumbs.html'
+		$attrs.templateUrl or '../bower_components/alp-custom/breadcrumbs/breadcrumbs.html'
 	scope:
 		'fetch': '&'
 		'list': '='
