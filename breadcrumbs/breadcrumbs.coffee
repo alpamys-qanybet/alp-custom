@@ -1,5 +1,3 @@
-angular.module('alpCustom', [])
-
 angular.module('alpCustom').directive "breadcrumbs", [()->
 	restrict: "EA"
 	templateUrl: ($element, $attrs)->
