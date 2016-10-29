@@ -1,7 +1,7 @@
 angular.module('alpCustom').directive "breadcrumbs", [()->
 	restrict: "EA"
 	templateUrl: ($element, $attrs)->
-		$attrs.templateUrl or '../bower_components/alp-custom/src/breadcrumbs/breadcrumbs.html'
+		$attrs.templateUrl or '../bower_components/alp-custom/src/dist/breadcrumbs/breadcrumbs.html'
 	scope:
 		'fetch': '&'
 		'list': '='
