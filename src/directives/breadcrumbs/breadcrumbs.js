@@ -4,7 +4,9 @@
   angular.module('alpCustom').directive("breadcrumbs", [
     function() {
       return {
-        restrict: "EA",
+        restrict: "E",
+        replace: true,
+        transclude: true,
         templateUrl: function(elm, attrs) {
           return attrs.templateUrl || '../bower_components/alp-custom/src/dist/breadcrumbs/breadcrumbs.html';
         },

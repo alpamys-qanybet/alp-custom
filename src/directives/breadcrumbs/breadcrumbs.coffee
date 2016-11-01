@@ -1,5 +1,7 @@
 angular.module('alpCustom').directive "breadcrumbs", [()->
-	restrict: "EA"
+	restrict: "E"
+	replace: true
+	transclude: true
 	templateUrl: (elm, attrs)->
 		attrs.templateUrl or '../bower_components/alp-custom/src/dist/breadcrumbs/breadcrumbs.html'
 	scope:
