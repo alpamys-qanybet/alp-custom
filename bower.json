@@ -5,7 +5,8 @@
     "Alpamys Qanybet (Kanibetov) <alpamys.kanibetov@gmail.com>"
   ],
   "dependencies": {
-    "angular": ">= 1.3.0"
+    "angular": ">= 1.3.0",
+    "underscore": ">= 1.8.3"
   },
   "description": "custom angular directives",
   "main": "src/dist/scripts.js",
