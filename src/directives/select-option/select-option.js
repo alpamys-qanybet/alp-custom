@@ -14,7 +14,7 @@
           'model': '=',
           'list': '='
         },
-        controller: function($scope, $element) {},
+        controller: ["$scope", "$element", function($scope, $element) {}],
         link: function(scope, elm, attrs) {},
         compile: function(cElement, cAttributes, transclude) {
           return {

@@ -10,7 +10,8 @@ angular.module('alpCustom').directive "selectOption", [()->
 		'model': '='
 		'list': '='
 	
-	controller: ($scope, $element)->
+	controller: ["$scope", "$element", ($scope, $element)->
+	]
 		
 	link: (scope, elm, attrs)->
 
