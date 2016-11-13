@@ -13,7 +13,7 @@ angular.module('alpCustom').directive "paginate", [()->
 		'showLimit': '='
 		'range': '@'
 	
-	controller: ($scope, $element)->
+	controller: ["$scope", "$element", ($scope, $element)->
 		$scope.limits = [1,2,3,4,5,10,15,20,25,30,40,50,100,200,300,400,500,1000]
 		# render pagination buttons
 		range = $scope.range #10
@@ -71,6 +71,7 @@ angular.module('alpCustom').directive "paginate", [()->
 		$scope.$watch 'limit', ->
 			$scope.index = 0
 			loadButtons()
+	]
 
 	link: (scope, elm, attrs)->
 		# run passed 'page' function on execution of 'process'
