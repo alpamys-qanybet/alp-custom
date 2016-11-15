@@ -19,7 +19,7 @@
   ]);
 
   angular.module('alpCustom').directive("hierarchialTree", [
-    'hierarchialTreeService', function(hierarchialTreeService) {
+    'hierarchialTreeService', 'LIB_URL', function(hierarchialTreeService, LIB_URL) {
       return {
         restrict: "E",
         replace: true,
@@ -34,6 +34,7 @@
         controller: ["$scope", "$element", function($scope, $element) {}],
         link: function(scope, elm, attrs) {
           var fetch, name;
+          console.log(LIB_URL);
           if (!scope.depth) {
             scope.depth = 0;
           }

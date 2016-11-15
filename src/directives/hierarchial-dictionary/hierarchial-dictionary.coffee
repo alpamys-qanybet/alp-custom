@@ -1,9 +1,8 @@
-angular.module('alpCustom').directive "hierarchialDictionary", [()->
+angular.module('alpCustom').directive "hierarchialDictionary", ['LIB_URL', (LIB_URL)->
 	restrict: "E"
 	replace: true
-	transclude: true
 	templateUrl: (elm, attrs)->
-		attrs.templateUrl or '../bower_components/alp-custom/src/dist/hierarchial-dictionary/hierarchial-dictionary.html'
+		attrs.templateUrl or LIB_URL + 'directives/hierarchial-dictionary/hierarchial-dictionary.html'
 	scope:
 		'fetch': '&'
 		'componentModel': "="

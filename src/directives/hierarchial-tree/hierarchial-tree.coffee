@@ -13,7 +13,7 @@ angular.module('alpCustom').service 'hierarchialTreeService', [()->
 	return this
 ]
 
-angular.module('alpCustom').directive "hierarchialTree", ['hierarchialTreeService', (hierarchialTreeService)->
+angular.module('alpCustom').directive "hierarchialTree", ['hierarchialTreeService', 'LIB_URL', (hierarchialTreeService, LIB_URL)->
 	restrict: "E"
 	replace: true
 	template: "<ul class='tree'><hierarchial-tree-node ng-repeat='c in list' item='c' uid='{{passUidToMember}}' content='{{content}}' depth='{{depth}}'></hierarchial-tree-node></ul>"
@@ -28,6 +28,8 @@ angular.module('alpCustom').directive "hierarchialTree", ['hierarchialTreeServic
 	]
 	
 	link: (scope, elm, attrs)->
+		console.log LIB_URL
+
 		if not scope.depth
 			scope.depth = 0
 

@@ -1,9 +1,9 @@
-angular.module('alpCustom').directive "paginate", [()->
+angular.module('alpCustom').directive "paginate", ['LIB_URL', (LIB_URL)->
 	restrict: "E"
 	replace: true
-	transclude: true
 	templateUrl: (elm, attrs)->
-		attrs.templateUrl or '../bower_components/alp-custom/src/dist/paginate/paginate.html'
+		attrs.templateUrl or LIB_URL + 'directives/paginate/paginate.html'
+
 	scope:
 		'page': '&'
 		'count': '@'
@@ -69,7 +69,11 @@ angular.module('alpCustom').directive "paginate", [()->
 			loadButtons()
 
 		$scope.$watch 'limit', ->
-			$scope.index = 0
+			if $scope.index == 0
+				$scope.page({index:$scope.index})
+			else
+				$scope.index = 0
+			
 			loadButtons()
 	]
 
@@ -83,4 +87,3 @@ angular.module('alpCustom').directive "paginate", [()->
 			scope.index = index
 			# scope.page({index:index})
 ]
-    

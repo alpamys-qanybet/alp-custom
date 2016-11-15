@@ -2,26 +2,23 @@
 (function() {
 
   angular.module('alpCustom').directive("selectOption", [
-    function() {
+    'LIB_URL', function(LIB_URL) {
       return {
         restrict: "E",
         replace: true,
-        transclude: true,
         templateUrl: function(elm, attrs) {
-          return attrs.templateUrl || '../bower_components/alp-custom/src/dist/select-option/select-option.html';
+          return attrs.templateUrl || LIB_URL + 'directives/select-option/select-option.html';
         },
         scope: {
           'model': '=',
           'list': '='
         },
-        controller: ["$scope", "$element", function($scope, $element) {}],
-        link: function(scope, elm, attrs) {},
         compile: function(cElement, cAttributes, transclude) {
           return {
-            pre: function(scope, element, attrs) {
+            pre: function(scope, elm, attrs) {
               return scope.expression = attrs.swOptions;
             },
-            post: function(scope, element, attrs) {}
+            post: function(scope, elm, attrs) {}
           };
         }
       };

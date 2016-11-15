@@ -2,13 +2,12 @@
 (function() {
 
   angular.module('alpCustom').directive("hierarchialDictionary", [
-    function() {
+    'LIB_URL', function(LIB_URL) {
       return {
         restrict: "E",
         replace: true,
-        transclude: true,
         templateUrl: function(elm, attrs) {
-          return attrs.templateUrl || '../bower_components/alp-custom/src/dist/hierarchial-dictionary/hierarchial-dictionary.html';
+          return attrs.templateUrl || LIB_URL + 'directives/hierarchial-dictionary/hierarchial-dictionary.html';
         },
         scope: {
           'fetch': '&',

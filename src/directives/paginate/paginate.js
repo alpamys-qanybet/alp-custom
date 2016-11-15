@@ -2,13 +2,12 @@
 (function() {
 
   angular.module('alpCustom').directive("paginate", [
-    function() {
+    'LIB_URL', function(LIB_URL) {
       return {
         restrict: "E",
         replace: true,
-        transclude: true,
         templateUrl: function(elm, attrs) {
-          return attrs.templateUrl || '../bower_components/alp-custom/src/dist/paginate/paginate.html';
+          return attrs.templateUrl || LIB_URL + 'directives/paginate/paginate.html';
         },
         scope: {
           'page': '&',
@@ -76,7 +75,13 @@
               return loadButtons();
             });
             return $scope.$watch('limit', function() {
-              $scope.index = 0;
+              if ($scope.index === 0) {
+                $scope.page({
+                  index: $scope.index
+                });
+              } else {
+                $scope.index = 0;
+              }
               return loadButtons();
             });
           }
