@@ -19,29 +19,38 @@ angular.module('alpCustom').directive "paginate", ['LIB_URL', (LIB_URL)->
 
 	compile: (cElement, cAttributes, transclude)->	
 		# console.log 'compile'
+
+		# set default values
 		defaultValues =
 			index: 0
 			limit: 10
 			limits: [1,2,3,4,5,10,15,20,25,30,40,50,100,200,300,400,500,1000]
 			range: 10
 		
+		# set default index if not assigned
 		if not cAttributes.index
 			cAttributes.index = '' + defaultValues.index
 	
+		# set default limit if not assigned
 		if not cAttributes.limit
 			cAttributes.limit = '' + defaultValues.limit
-	
+		
 		showLimit = false
+
+		# set default limits if limits not assigned or empty
 		if cAttributes.limits
 			limits = JSON.parse cAttributes.limits
 			if _.isEmpty limits
 				cAttributes.limits = JSON.stringify defaultValues.limits
 			else
+				# set default limit as first if limits assigned
 				cAttributes.limit = '' + limits[0]
+				# show limits dropdown if limits assigned and length > 1
 				showLimit = limits.length > 1
 		else
 			cAttributes.limits = JSON.stringify defaultValues.limits
 
+		# set default range if not assigned
 		if not cAttributes.range
 			cAttributes.range = '' + defaultValues.range
 		
@@ -50,6 +59,7 @@ angular.module('alpCustom').directive "paginate", ['LIB_URL', (LIB_URL)->
 		,
 		post: (scope, elm, attrs)->
 			# console.log 'post'
+			# assign scope.showLimit on post-link as scope is available
 			scope.showLimit = showLimit
 		
 			# render pagination buttons
@@ -74,39 +84,51 @@ angular.module('alpCustom').directive "paginate", ['LIB_URL', (LIB_URL)->
 
 				scope.replist = scope.list.slice(begin, end)
 			
-			# rerender after retrieve count data
+			# watchers
 			onInit =
 				count: true
 				index: true
 				limit: true
 
+			# watcher of count(total elements count) after each data come 
 			scope.$watch 'count', ->
+				# do not trigger watcher on init
 				if onInit.count
 					onInit.count = false
 					return
 
+				# render page buttons
 				loadButtons()
 
+			# watchers of index and limit change by user on paginate template
 			scope.$watch 'index', ->
+				# do not trigger watcher on init
 				if onInit.index
 					onInit.index = false
 					return
-
+	
+				# request for data specified to index
 				scope.page({index:scope.index, limit:scope.limit})
+				
+				# render page buttons
 				loadButtons()
 
 			scope.$watch 'limit', ->
+				# do not trigger watcher on init
 				if onInit.limit
 					onInit.limit = false
 					return
 
+				# on limit change at the beginning
 				if scope.index == 0
 					scope.page({index:scope.index, limit:scope.limit})
-				else
+				else # on limit change go to beginning
 					scope.index = 0
 				
+				# render page buttons
 				loadButtons()
 
+			# request for first data
 			scope.page({index:scope.index, limit:scope.limit})
 
 			# run passed 'page' function on execution of 'process'
