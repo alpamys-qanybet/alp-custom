@@ -15,6 +15,13 @@ angular.module('alpCustom').directive "paginate", ['LIB_URL', (LIB_URL)->
 	
 	controller: ["$scope", "$element", (scope, elm)->
 		# console.log 'ctrl'
+		# run passed 'page' function on execution of 'process'
+		scope.process = (index)->
+			# do not rerender if current or exceeded list range index requested
+			if scope.index == index or index < 0 or index >= scope.list.length
+				return
+
+			scope.index = index
 	]
 
 	compile: (cElement, cAttributes, transclude)->	
@@ -130,12 +137,4 @@ angular.module('alpCustom').directive "paginate", ['LIB_URL', (LIB_URL)->
 
 			# request for first data
 			scope.page({index:scope.index, limit:scope.limit})
-
-			# run passed 'page' function on execution of 'process'
-			scope.process = (index)->
-				# do not rerender if current or exceeded list range index requested
-				if scope.index == index or index < 0 or index >= scope.list.length
-					return
-
-				scope.index = index
 ]
