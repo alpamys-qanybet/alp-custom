@@ -20,7 +20,7 @@ angular.module('alpCustom').directive "paginate", ['LIB_URL', (LIB_URL)->
 	compile: (cElement, cAttributes, transclude)->	
 		# console.log 'compile'
 
-		# set default values
+		# default values
 		defaultValues =
 			index: 0
 			limit: 10
