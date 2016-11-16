@@ -12,86 +12,118 @@
         scope: {
           'page': '&',
           'count': '@',
-          'limit': '=',
           'index': '=',
           'showIndex': '=',
-          'showLimit': '=',
+          'limit': '=',
+          'limits': '=',
           'range': '@'
         },
-        controller: [
-          "$scope", "$element", function($scope, $element) {
-            var FOUR_DIGIT_WIDTH, ONE_DIGIT_WIDTH, THREE_DIGIT_WIDTH, TWO_DIGIT_WIDTH, loadButtons, range;
-            $scope.limits = [1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 40, 50, 100, 200, 300, 400, 500, 1000];
-            range = $scope.range;
-            ONE_DIGIT_WIDTH = 41;
-            TWO_DIGIT_WIDTH = 49;
-            THREE_DIGIT_WIDTH = 56.36;
-            FOUR_DIGIT_WIDTH = 64.157;
-            loadButtons = function() {
-              var begin, end, n, _i, _results;
-              n = Math.ceil($scope.count / $scope.limit);
-              $scope.list = (function() {
-                _results = [];
-                for (var _i = 0; 0 <= n ? _i < n : _i > n; 0 <= n ? _i++ : _i--){ _results.push(_i); }
-                return _results;
-              }).apply(this);
-              if (n < 10) {
-                $scope.stylewidth = n * ONE_DIGIT_WIDTH;
-              } else if (n < 100) {
-                $scope.stylewidth = 9 * ONE_DIGIT_WIDTH;
-                $scope.stylewidth += (n - 9) * TWO_DIGIT_WIDTH;
-              } else if (n < 1000) {
-                $scope.stylewidth = 9 * ONE_DIGIT_WIDTH;
-                $scope.stylewidth += 90 * TWO_DIGIT_WIDTH;
-                $scope.stylewidth += (n - 99) * THREE_DIGIT_WIDTH;
-              } else {
-                $scope.stylewidth = 9 * ONE_DIGIT_WIDTH;
-                $scope.stylewidth += 90 * TWO_DIGIT_WIDTH;
-                $scope.stylewidth += 900 * THREE_DIGIT_WIDTH;
-                $scope.stylewidth += (n - 999) * FOUR_DIGIT_WIDTH;
-              }
-              begin = $scope.index - range / 2;
-              if (begin < 0) {
-                begin = 0;
-              }
-              end = $scope.index + range / 2;
-              if (end > n) {
-                end = n;
-              }
-              if ((end - begin) < range) {
-                end = begin + range;
-              }
-              return $scope.replist = $scope.list.slice(begin, end);
-            };
-            $scope.index = 0;
-            $scope.$watch('count', function() {
-              $scope.index = 0;
-              return loadButtons();
-            });
-            $scope.$watch('index', function() {
-              $scope.page({
-                index: $scope.index
-              });
-              return loadButtons();
-            });
-            return $scope.$watch('limit', function() {
-              if ($scope.index === 0) {
-                $scope.page({
-                  index: $scope.index
-                });
-              } else {
-                $scope.index = 0;
-              }
-              return loadButtons();
-            });
+        controller: ["$scope", "$element", function(scope, elm) {}],
+        compile: function(cElement, cAttributes, transclude) {
+          var defaultValues, limits, showLimit;
+          defaultValues = {
+            index: 0,
+            limit: 10,
+            limits: [1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 40, 50, 100, 200, 300, 400, 500, 1000],
+            range: 10
+          };
+          if (!cAttributes.index) {
+            cAttributes.index = '' + defaultValues.index;
           }
-        ],
-        link: function(scope, elm, attrs) {
-          return scope.process = function(index) {
-            if (scope.index === index || index < 0 || index >= scope.list.length) {
-              return;
+          if (!cAttributes.limit) {
+            cAttributes.limit = '' + defaultValues.limit;
+          }
+          showLimit = false;
+          if (cAttributes.limits) {
+            limits = JSON.parse(cAttributes.limits);
+            if (_.isEmpty(limits)) {
+              cAttributes.limits = JSON.stringify(defaultValues.limits);
+            } else {
+              cAttributes.limit = '' + limits[0];
+              showLimit = limits.length > 1;
             }
-            return scope.index = index;
+          } else {
+            cAttributes.limits = JSON.stringify(defaultValues.limits);
+          }
+          if (!cAttributes.range) {
+            cAttributes.range = '' + defaultValues.range;
+          }
+          return {
+            pre: function(scope, elm, attrs) {},
+            post: function(scope, elm, attrs) {
+              var loadButtons, onInit, range;
+              scope.showLimit = showLimit;
+              range = Number(scope.range);
+              loadButtons = function() {
+                var begin, end, n, _i, _results;
+                n = Math.ceil(scope.count / scope.limit);
+                scope.list = (function() {
+                  _results = [];
+                  for (var _i = 0; 0 <= n ? _i < n : _i > n; 0 <= n ? _i++ : _i--){ _results.push(_i); }
+                  return _results;
+                }).apply(this);
+                begin = scope.index - range / 2;
+                if (begin < 0) {
+                  begin = 0;
+                }
+                end = scope.index + range / 2;
+                if (end > n) {
+                  end = n;
+                }
+                if ((end - begin) < range) {
+                  end = begin + range;
+                }
+                return scope.replist = scope.list.slice(begin, end);
+              };
+              onInit = {
+                count: true,
+                index: true,
+                limit: true
+              };
+              scope.$watch('count', function() {
+                if (onInit.count) {
+                  onInit.count = false;
+                  return;
+                }
+                return loadButtons();
+              });
+              scope.$watch('index', function() {
+                if (onInit.index) {
+                  onInit.index = false;
+                  return;
+                }
+                scope.page({
+                  index: scope.index,
+                  limit: scope.limit
+                });
+                return loadButtons();
+              });
+              scope.$watch('limit', function() {
+                if (onInit.limit) {
+                  onInit.limit = false;
+                  return;
+                }
+                if (scope.index === 0) {
+                  scope.page({
+                    index: scope.index,
+                    limit: scope.limit
+                  });
+                } else {
+                  scope.index = 0;
+                }
+                return loadButtons();
+              });
+              scope.page({
+                index: scope.index,
+                limit: scope.limit
+              });
+              return scope.process = function(index) {
+                if (scope.index === index || index < 0 || index >= scope.list.length) {
+                  return;
+                }
+                return scope.index = index;
+              };
+            }
           };
         }
       };

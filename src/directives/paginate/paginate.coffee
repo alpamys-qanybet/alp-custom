@@ -7,83 +7,113 @@ angular.module('alpCustom').directive "paginate", ['LIB_URL', (LIB_URL)->
 	scope:
 		'page': '&'
 		'count': '@'
-		'limit': '='
-		'index': '='
-		'showIndex': '='
-		'showLimit': '='
-		'range': '@'
+		'index': '='	# optional
+		'showIndex': '='	# optional
+		'limit': '='	# optional
+		'limits': '='	# optional
+		'range': '@'	# optional
 	
-	controller: ["$scope", "$element", ($scope, $element)->
-		$scope.limits = [1,2,3,4,5,10,15,20,25,30,40,50,100,200,300,400,500,1000]
-		# render pagination buttons
-		range = $scope.range #10
-		ONE_DIGIT_WIDTH = 41
-		TWO_DIGIT_WIDTH = 49
-		THREE_DIGIT_WIDTH = 56.36
-		FOUR_DIGIT_WIDTH = 64.157
-
-		loadButtons = ->
-			n = Math.ceil($scope.count / $scope.limit)
-			$scope.list = [0...n]
-
-			if (n < 10) 
-				$scope.stylewidth = n * ONE_DIGIT_WIDTH
-			else if (n < 100)
-				$scope.stylewidth = 9 * ONE_DIGIT_WIDTH
-				$scope.stylewidth += (n - 9) * TWO_DIGIT_WIDTH
-			else if (n < 1000)
-				$scope.stylewidth = 9 * ONE_DIGIT_WIDTH
-				$scope.stylewidth += 90 * TWO_DIGIT_WIDTH
-				$scope.stylewidth += (n - 99) * THREE_DIGIT_WIDTH
-			else 
-				# if (n < 10000)
-				$scope.stylewidth = 9 * ONE_DIGIT_WIDTH
-				$scope.stylewidth += 90 * TWO_DIGIT_WIDTH
-				$scope.stylewidth += 900 * THREE_DIGIT_WIDTH
-				$scope.stylewidth += (n - 999) * FOUR_DIGIT_WIDTH
-
-
-			begin = $scope.index - range / 2
-			if begin < 0
-				begin = 0
-
-			end = $scope.index + range / 2
-			if end > n
-				end = n
-
-			if (end - begin) < range
-				end = begin + range
-
-			$scope.replist = $scope.list.slice(begin, end)
-		
-		$scope.index = 0
-		# loadButtons()
-
-		# rerender after retrieve count data
-		$scope.$watch 'count', ->
-			$scope.index = 0
-			loadButtons()
-
-		$scope.$watch 'index', ->
-			$scope.page({index:$scope.index})
-			loadButtons()
-
-		$scope.$watch 'limit', ->
-			if $scope.index == 0
-				$scope.page({index:$scope.index})
-			else
-				$scope.index = 0
-			
-			loadButtons()
+	controller: ["$scope", "$element", (scope, elm)->
+		# console.log 'ctrl'
 	]
 
-	link: (scope, elm, attrs)->
-		# run passed 'page' function on execution of 'process'
-		scope.process = (index)->
-			# do not rerender if current or exceeded list range index requested
-			if scope.index == index or index < 0 or index >= scope.list.length
-				return
+	compile: (cElement, cAttributes, transclude)->	
+		# console.log 'compile'
+		defaultValues =
+			index: 0
+			limit: 10
+			limits: [1,2,3,4,5,10,15,20,25,30,40,50,100,200,300,400,500,1000]
+			range: 10
+		
+		if not cAttributes.index
+			cAttributes.index = '' + defaultValues.index
+	
+		if not cAttributes.limit
+			cAttributes.limit = '' + defaultValues.limit
+	
+		showLimit = false
+		if cAttributes.limits
+			limits = JSON.parse cAttributes.limits
+			if _.isEmpty limits
+				cAttributes.limits = JSON.stringify defaultValues.limits
+			else
+				cAttributes.limit = '' + limits[0]
+				showLimit = limits.length > 1
+		else
+			cAttributes.limits = JSON.stringify defaultValues.limits
 
-			scope.index = index
-			# scope.page({index:index})
+		if not cAttributes.range
+			cAttributes.range = '' + defaultValues.range
+		
+		pre: (scope, elm, attrs)->
+			# console.log 'pre'
+		,
+		post: (scope, elm, attrs)->
+			# console.log 'post'
+			scope.showLimit = showLimit
+		
+			# render pagination buttons
+			range = Number scope.range
+
+			loadButtons = ->
+				n = Math.ceil(scope.count / scope.limit)
+				scope.list = [0...n]
+
+				begin = scope.index - range / 2
+
+				if begin < 0
+					begin = 0
+
+				end = scope.index + range / 2
+
+				if end > n
+					end = n
+
+				if (end - begin) < range
+					end = begin + range
+
+				scope.replist = scope.list.slice(begin, end)
+			
+			# rerender after retrieve count data
+			onInit =
+				count: true
+				index: true
+				limit: true
+
+			scope.$watch 'count', ->
+				if onInit.count
+					onInit.count = false
+					return
+
+				loadButtons()
+
+			scope.$watch 'index', ->
+				if onInit.index
+					onInit.index = false
+					return
+
+				scope.page({index:scope.index, limit:scope.limit})
+				loadButtons()
+
+			scope.$watch 'limit', ->
+				if onInit.limit
+					onInit.limit = false
+					return
+
+				if scope.index == 0
+					scope.page({index:scope.index, limit:scope.limit})
+				else
+					scope.index = 0
+				
+				loadButtons()
+
+			scope.page({index:scope.index, limit:scope.limit})
+
+			# run passed 'page' function on execution of 'process'
+			scope.process = (index)->
+				# do not rerender if current or exceeded list range index requested
+				if scope.index == index or index < 0 or index >= scope.list.length
+					return
+
+				scope.index = index
 ]
