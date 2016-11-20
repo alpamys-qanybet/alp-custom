@@ -23,6 +23,7 @@ angular.module('alpCustom').directive "hierarchialDictionary", ['LIB_URL', (LIB_
 				scope.componentModel.full.push node.selected
 
 			scope.componentModel.selected = scope.componentModel.full[scope.componentModel.full.length - 1]
+			return
 
 		process = (data)->
 			node =
@@ -48,18 +49,25 @@ angular.module('alpCustom').directive "hierarchialDictionary", ['LIB_URL', (LIB_
 						scope.path = scope.path.slice(0, index+1)
 						select()
 						fetch newvalue.id
+					return
+			return
 		
 		fetch = (id)->
 			if id
 				scope.fetch({id: id, fn: (data)->
 					if data and data.length > 0
 						process data
+						return
 				})
+				return
 			else # root
 				scope.fetch({id: null, fn: (data)->
 					scope.path = []
 					process data
+					return
 				})
+				return
 
 		fetch()
+		return
 ]

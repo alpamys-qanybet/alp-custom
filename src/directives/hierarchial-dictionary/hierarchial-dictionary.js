@@ -29,7 +29,7 @@
               node = _ref[i];
               scope.componentModel.full.push(node.selected);
             }
-            return scope.componentModel.selected = scope.componentModel.full[scope.componentModel.full.length - 1];
+            scope.componentModel.selected = scope.componentModel.full[scope.componentModel.full.length - 1];
           };
           process = function(data) {
             var node;
@@ -39,12 +39,12 @@
             };
             scope.path.push(node);
             select();
-            return scope.$watch(function() {
+            scope.$watch(function() {
               return node.selected;
             }, function(newvalue, oldvalue) {
               var index, n, _i, _len, _ref;
               if (_.isNull(newvalue)) {
-
+                return;
               } else {
                 index = 0;
                 _ref = scope.path;
@@ -57,31 +57,31 @@
                 }
                 scope.path = scope.path.slice(0, index + 1);
                 select();
-                return fetch(newvalue.id);
+                fetch(newvalue.id);
               }
             });
           };
           fetch = function(id) {
             if (id) {
-              return scope.fetch({
+              scope.fetch({
                 id: id,
                 fn: function(data) {
                   if (data && data.length > 0) {
-                    return process(data);
+                    process(data);
                   }
                 }
               });
             } else {
-              return scope.fetch({
+              scope.fetch({
                 id: null,
                 fn: function(data) {
                   scope.path = [];
-                  return process(data);
+                  process(data);
                 }
               });
             }
           };
-          return fetch();
+          fetch();
         }
       };
     }
