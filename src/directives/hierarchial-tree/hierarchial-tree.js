@@ -24,7 +24,11 @@
         restrict: "E",
         replace: true,
         templateUrl: function(elm, attrs) {
-          return attrs.templateUrl || LIB_URL + 'directives/hierarchial-tree/hierarchial-tree.html';
+          if (attrs.template) {
+            return LIB_URL + 'directives/hierarchial-tree/hierarchial-tree-' + attrs.template + '.html';
+          } else {
+            return attrs.templateUrl || LIB_URL + 'directives/hierarchial-tree/hierarchial-tree.html';
+          }
         },
         scope: {
           id: '=',
@@ -101,7 +105,11 @@
         restrict: "E",
         replace: true,
         templateUrl: function(elm, attrs) {
-          return attrs.nodeTemplateUrl || LIB_URL + 'directives/hierarchial-tree/hierarchial-tree-node.html';
+          if (attrs.template) {
+            return LIB_URL + 'directives/hierarchial-tree/hierarchial-tree-node-' + attrs.template + '.html';
+          } else {
+            return attrs.nodeTemplateUrl || LIB_URL + 'directives/hierarchial-tree/hierarchial-tree-node.html';
+          }
         },
         scope: {
           item: '=',
@@ -133,7 +141,9 @@
               scope.item.open = true;
               el = angular.element('<span/>');
               tt = '<hierarchial-tree id="item.id" uid="{{uid}}" ng-show="item.open" depth="{{' + nextDepth + '}}"';
-              if (attrs.templateUrl) {
+              if (attrs.template) {
+                tt += ' template="' + attrs.template + '"';
+              } else if (attrs.templateUrl) {
                 tt += ' template-url="' + attrs.templateUrl + '"';
               }
               tt += '></hierarchial-tree>';

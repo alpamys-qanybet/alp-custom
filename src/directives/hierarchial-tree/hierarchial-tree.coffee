@@ -18,7 +18,10 @@ angular.module('alpCustom').directive "hierarchialTree", ['hierarchialTreeServic
 	restrict: "E"
 	replace: true
 	templateUrl: (elm, attrs)->
-		attrs.templateUrl or LIB_URL + 'directives/hierarchial-tree/hierarchial-tree.html'
+		if attrs.template
+			LIB_URL + 'directives/hierarchial-tree/hierarchial-tree-'+attrs.template+'.html'
+		else
+			attrs.templateUrl or LIB_URL + 'directives/hierarchial-tree/hierarchial-tree.html'
 	scope:
 		id: '='
 		fetch: '&'
@@ -93,7 +96,10 @@ angular.module('alpCustom').directive "hierarchialTreeNode", ['$templateRequest'
 	restrict: "E"
 	replace: true
 	templateUrl: (elm, attrs)->
-		attrs.nodeTemplateUrl or LIB_URL + 'directives/hierarchial-tree/hierarchial-tree-node.html'
+		if attrs.template
+			LIB_URL + 'directives/hierarchial-tree/hierarchial-tree-node-'+attrs.template+'.html'
+		else
+			attrs.nodeTemplateUrl or LIB_URL + 'directives/hierarchial-tree/hierarchial-tree-node.html'
 	scope:
 		item: '='
 		uid: '@'
@@ -121,17 +127,11 @@ angular.module('alpCustom').directive "hierarchialTreeNode", ['$templateRequest'
 				scope.item.loaded = true
 				scope.item.open = true
 				
-				# tt = '<hierarchial-tree id="item.id" uid="{{uid}}" ng-show="item.open" depth="{{'+nextDepth+'}}"'
-				# if attrs.templateUrl
-				# 	tt += ' template-url="'+attrs.templateUrl+'"'
-				# tt += '></hierarchial-tree>'
-
-				# elm.append(tt)
-				# $compile(elm.contents())(scope)
 				el = angular.element('<span/>')
-				# el.append('<input type="text" ng-model="input.value"/><button ng-if="input.value" ng-click="input.value=\'\'; doSomething()">X</button>')
 				tt = '<hierarchial-tree id="item.id" uid="{{uid}}" ng-show="item.open" depth="{{'+nextDepth+'}}"'
-				if attrs.templateUrl
+				if attrs.template
+					tt += ' template="'+attrs.template+'"'
+				else if attrs.templateUrl
 					tt += ' template-url="'+attrs.templateUrl+'"'
 				tt += '></hierarchial-tree>'
 
