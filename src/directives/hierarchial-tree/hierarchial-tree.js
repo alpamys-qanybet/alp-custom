@@ -43,6 +43,9 @@
           if (!scope.depth) {
             scope.depth = 0;
           }
+          if (attrs.contentUrl) {
+            scope.contentUrl = attrs.contentUrl;
+          }
           scope.templateUrl = attrs.templateUrl;
           name = '';
           if (scope.uid) {
@@ -115,48 +118,76 @@
           item: '=',
           uid: '@'
         },
-        controller: ["$scope", "$element", function($scope, $element) {}],
-        link: function(scope, elm, attrs) {
-          var px;
-          px = 20 * Number(attrs.depth);
-          scope.select = function() {
-            var i, _i, _len, _ref;
-            _ref = hierarchialTreeService.map[scope.uid].list;
-            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-              i = _ref[_i];
-              i.selected = false;
-            }
-            scope.item.selected = true;
-            hierarchialTreeService.map[scope.uid].component = angular.copy(scope.item);
-          };
-          scope.item.indented = {
-            position: 'relative',
-            left: px + 'px'
-          };
-          scope.load = function() {
-            var el, nextDepth, tt;
-            nextDepth = Number(attrs.depth) + 1;
-            if (scope.item.hasChildren) {
-              scope.item.loaded = true;
-              scope.item.open = true;
-              el = angular.element('<span/>');
-              tt = '<hierarchial-tree id="item.id" uid="{{uid}}" ng-show="item.open" depth="{{' + nextDepth + '}}"';
-              if (attrs.template) {
-                tt += ' template="' + attrs.template + '"';
-              } else if (attrs.templateUrl) {
-                tt += ' template-url="' + attrs.templateUrl + '"';
+        controller: ["$scope", "$element", function(scope, elm) {}],
+        compile: function(cElement, cAttributes, transclude) {
+          return {
+            pre: function(scope, elm, attrs) {
+              var replace, url;
+              replace = function(selector, content) {
+                var domElement;
+                domElement = elm.find(selector).clone();
+                domElement.html(content);
+                domElement = $compile(domElement)(scope);
+                elm.find(selector).replaceWith(domElement);
+              };
+              if (attrs.contentUrl) {
+                url = $sce.getTrustedResourceUrl(attrs.contentUrl);
+                $templateRequest(url).then(function(t) {
+                  replace('#item-content', t);
+                }, function() {
+                  console.error('content url not found');
+                  replace('#item-content', '{{item}}');
+                });
+              } else {
+                replace('#item-content', '{{item}}');
               }
-              tt += '></hierarchial-tree>';
-              el.append(tt);
-              $compile(el)(scope);
-              elm.append(el);
+            },
+            post: function(scope, elm, attrs) {
+              var px;
+              px = 20 * Number(attrs.depth);
+              scope.select = function() {
+                var i, _i, _len, _ref;
+                _ref = hierarchialTreeService.map[scope.uid].list;
+                for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                  i = _ref[_i];
+                  i.selected = false;
+                }
+                scope.item.selected = true;
+                hierarchialTreeService.map[scope.uid].component = angular.copy(scope.item);
+              };
+              scope.item.indented = {
+                position: 'relative',
+                left: px + 'px'
+              };
+              scope.load = function() {
+                var el, nextDepth, tt;
+                nextDepth = Number(attrs.depth) + 1;
+                if (scope.item.hasChildren) {
+                  scope.item.loaded = true;
+                  scope.item.open = true;
+                  tt = '<hierarchial-tree id="item.id" uid="{{uid}}" ng-show="item.open" depth="{{' + nextDepth + '}}"';
+                  if (attrs.template) {
+                    tt += ' template="' + attrs.template + '"';
+                  } else if (attrs.templateUrl) {
+                    tt += ' template-url="' + attrs.templateUrl + '"';
+                  }
+                  if (attrs.contentUrl) {
+                    tt += ' content-url="' + attrs.contentUrl + '"';
+                  }
+                  tt += '></hierarchial-tree>';
+                  el = angular.element(tt);
+                  el.append(tt);
+                  $compile(el)(scope);
+                  elm.append(el);
+                }
+              };
+              scope.expand = function() {
+                scope.item.open = true;
+              };
+              scope.collapse = function() {
+                scope.item.open = false;
+              };
             }
-          };
-          scope.expand = function() {
-            scope.item.open = true;
-          };
-          scope.collapse = function() {
-            scope.item.open = false;
           };
         }
       };

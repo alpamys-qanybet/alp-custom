@@ -36,6 +36,9 @@ angular.module('alpCustom').directive "hierarchialTree", ['hierarchialTreeServic
 		if not scope.depth
 			scope.depth = 0
 
+		if attrs.contentUrl
+			scope.contentUrl = attrs.contentUrl
+		
 		scope.templateUrl = attrs.templateUrl
 		name = ''
 
@@ -104,48 +107,77 @@ angular.module('alpCustom').directive "hierarchialTreeNode", ['$templateRequest'
 		item: '='
 		uid: '@'
 	
-	controller: ["$scope", "$element", ($scope, $element)->
+	controller: ["$scope", "$element", (scope, elm)->
 	]
-	
-	link: (scope, elm, attrs)->
-		px = 20 * Number attrs.depth
-		scope.select = ->
-			for i in hierarchialTreeService.map[scope.uid].list
-				i.selected = false
-			scope.item.selected = true
-			
-			hierarchialTreeService.map[scope.uid].component = angular.copy scope.item
-			return
 
-		scope.item.indented = 
-			position: 'relative'
-			left: px + 'px'
-		
-		scope.load = ->
-			nextDepth = Number(attrs.depth) + 1
-			if scope.item.hasChildren
-				scope.item.loaded = true
-				scope.item.open = true
-				
-				el = angular.element('<span/>')
-				tt = '<hierarchial-tree id="item.id" uid="{{uid}}" ng-show="item.open" depth="{{'+nextDepth+'}}"'
-				if attrs.template
-					tt += ' template="'+attrs.template+'"'
-				else if attrs.templateUrl
-					tt += ' template-url="'+attrs.templateUrl+'"'
-				tt += '></hierarchial-tree>'
 
-				el.append(tt)
-				$compile(el)(scope)
-				elm.append(el)
+	compile: (cElement, cAttributes, transclude)->
+		pre: (scope, elm, attrs)->
+			replace = (selector, content)->
+				domElement = elm.find(selector).clone()
+				domElement.html content
+				domElement = $compile(domElement)(scope)
+				elm.find(selector).replaceWith domElement
 				return
 
-		scope.expand = ->
-			scope.item.open = true
+			if attrs.contentUrl
+				url = $sce.getTrustedResourceUrl attrs.contentUrl
+				$templateRequest(url).then (t)->
+					replace '#item-content', t
+					return
+				, ->
+					console.error 'content url not found'
+					replace '#item-content', '{{item}}'
+					return
+				return
+			else
+				replace '#item-content', '{{item}}'
+				return
+		,
+		post: (scope, elm, attrs)->
+			px = 20 * Number attrs.depth
+			scope.select = ->
+				for i in hierarchialTreeService.map[scope.uid].list
+					i.selected = false
+				scope.item.selected = true
+				
+				hierarchialTreeService.map[scope.uid].component = angular.copy scope.item
+				return
+
+			scope.item.indented = 
+				position: 'relative'
+				left: px + 'px'
+			
+			scope.load = ->
+				nextDepth = Number(attrs.depth) + 1
+				if scope.item.hasChildren
+					scope.item.loaded = true
+					scope.item.open = true
+					
+					tt = '<hierarchial-tree id="item.id" uid="{{uid}}" ng-show="item.open" depth="{{'+nextDepth+'}}"'
+					
+					if attrs.template
+						tt += ' template="'+attrs.template+'"'
+					else if attrs.templateUrl
+						tt += ' template-url="'+attrs.templateUrl+'"'
+					
+					if attrs.contentUrl
+						tt += ' content-url="'+attrs.contentUrl+'"'
+					
+					tt += '></hierarchial-tree>'
+
+					el = angular.element tt
+					el.append tt
+					$compile(el)(scope)
+					elm.append(el)
+					return
+
+			scope.expand = ->
+				scope.item.open = true
+				return
+		
+			scope.collapse = ->
+				scope.item.open = false
+				return
 			return
-	
-		scope.collapse = ->
-			scope.item.open = false
-			return
-		return
 ]
