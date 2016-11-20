@@ -23,14 +23,14 @@
                 id: 'root',
                 name: 'Main'
               };
-              return $scope.list.push(root);
+              $scope.list.push(root);
             };
             init();
-            return $scope.process = function(id) {
+            $scope.process = function(id) {
               var b, list, _i, _len, _ref;
               if (id === 'root') {
                 init();
-                return $scope.fetch();
+                $scope.fetch();
               } else {
                 list = [];
                 _ref = $scope.list;
@@ -42,14 +42,13 @@
                   }
                 }
                 $scope.list = list;
-                return $scope.fetch({
+                $scope.fetch({
                   id: id
                 });
               }
             };
           }
-        ],
-        link: function(scope, elm, attrs) {}
+        ]
       };
     }
   ]);
