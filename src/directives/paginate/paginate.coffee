@@ -2,7 +2,10 @@ angular.module('alpCustom').directive "paginate", ['LIB_URL', (LIB_URL)->
 	restrict: "E"
 	replace: true
 	templateUrl: (elm, attrs)->
-		attrs.templateUrl or LIB_URL + 'directives/paginate/paginate.html'
+		if attrs.template
+			LIB_URL + 'directives/paginate/paginate-'+attrs.template+'.html'
+		else
+			attrs.templateUrl or LIB_URL + 'directives/paginate/paginate.html'
 
 	scope:
 		'page': '&'
@@ -22,6 +25,7 @@ angular.module('alpCustom').directive "paginate", ['LIB_URL', (LIB_URL)->
 				return
 
 			scope.index = index
+			return
 	]
 
 	compile: (cElement, cAttributes, transclude)->	
@@ -31,7 +35,6 @@ angular.module('alpCustom').directive "paginate", ['LIB_URL', (LIB_URL)->
 		defaultValues =
 			index: 0
 			limit: 10
-			limits: [1,2,3,4,5,10,15,20,25,30,40,50,100,200,300,400,500,1000]
 			range: 10
 		
 		# set default index if not assigned
@@ -44,19 +47,15 @@ angular.module('alpCustom').directive "paginate", ['LIB_URL', (LIB_URL)->
 		
 		showLimit = false
 
-		# set default limits if limits not assigned or empty
+		# set limits if limits assigned and not empty
 		if cAttributes.limits
 			limits = JSON.parse cAttributes.limits
-			if _.isEmpty limits
-				cAttributes.limits = JSON.stringify defaultValues.limits
-			else
-				# set default limit as first if limits assigned
+			if not _.isEmpty limits
+				# set default limit as first
 				cAttributes.limit = '' + limits[0]
-				# show limits dropdown if limits assigned and length > 1
+				# show limits dropdown if length > 1
 				showLimit = limits.length > 1
-		else
-			cAttributes.limits = JSON.stringify defaultValues.limits
-
+		
 		# set default range if not assigned
 		if not cAttributes.range
 			cAttributes.range = '' + defaultValues.range
@@ -68,7 +67,7 @@ angular.module('alpCustom').directive "paginate", ['LIB_URL', (LIB_URL)->
 			# console.log 'post'
 			# assign scope.showLimit on post-link as scope is available
 			scope.showLimit = showLimit
-		
+			
 			# render pagination buttons
 			range = Number scope.range
 
@@ -90,6 +89,7 @@ angular.module('alpCustom').directive "paginate", ['LIB_URL', (LIB_URL)->
 					end = begin + range
 
 				scope.replist = scope.list.slice(begin, end)
+				return
 			
 			# watchers
 			onInit =
@@ -106,6 +106,7 @@ angular.module('alpCustom').directive "paginate", ['LIB_URL', (LIB_URL)->
 
 				# render page buttons
 				loadButtons()
+				return
 
 			# watchers of index and limit change by user on paginate template
 			scope.$watch 'index', ->
@@ -119,6 +120,7 @@ angular.module('alpCustom').directive "paginate", ['LIB_URL', (LIB_URL)->
 				
 				# render page buttons
 				loadButtons()
+				return
 
 			scope.$watch 'limit', ->
 				# do not trigger watcher on init
@@ -134,7 +136,9 @@ angular.module('alpCustom').directive "paginate", ['LIB_URL', (LIB_URL)->
 				
 				# render page buttons
 				loadButtons()
+				return
 
 			# request for first data
 			scope.page({index:scope.index, limit:scope.limit})
+			return
 ]

@@ -7,7 +7,11 @@
         restrict: "E",
         replace: true,
         templateUrl: function(elm, attrs) {
-          return attrs.templateUrl || LIB_URL + 'directives/paginate/paginate.html';
+          if (attrs.template) {
+            return LIB_URL + 'directives/paginate/paginate-' + attrs.template + '.html';
+          } else {
+            return attrs.templateUrl || LIB_URL + 'directives/paginate/paginate.html';
+          }
         },
         scope: {
           'page': '&',
@@ -18,13 +22,21 @@
           'limits': '=',
           'range': '@'
         },
-        controller: ["$scope", "$element", function(scope, elm) {}],
+        controller: [
+          "$scope", "$element", function(scope, elm) {
+            return scope.process = function(index) {
+              if (scope.index === index || index < 0 || index >= scope.list.length) {
+                return;
+              }
+              scope.index = index;
+            };
+          }
+        ],
         compile: function(cElement, cAttributes, transclude) {
           var defaultValues, limits, showLimit;
           defaultValues = {
             index: 0,
             limit: 10,
-            limits: [1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 40, 50, 100, 200, 300, 400, 500, 1000],
             range: 10
           };
           if (!cAttributes.index) {
@@ -36,14 +48,10 @@
           showLimit = false;
           if (cAttributes.limits) {
             limits = JSON.parse(cAttributes.limits);
-            if (_.isEmpty(limits)) {
-              cAttributes.limits = JSON.stringify(defaultValues.limits);
-            } else {
+            if (!_.isEmpty(limits)) {
               cAttributes.limit = '' + limits[0];
               showLimit = limits.length > 1;
             }
-          } else {
-            cAttributes.limits = JSON.stringify(defaultValues.limits);
           }
           if (!cAttributes.range) {
             cAttributes.range = '' + defaultValues.range;
@@ -73,7 +81,7 @@
                 if ((end - begin) < range) {
                   end = begin + range;
                 }
-                return scope.replist = scope.list.slice(begin, end);
+                scope.replist = scope.list.slice(begin, end);
               };
               onInit = {
                 count: true,
@@ -85,7 +93,7 @@
                   onInit.count = false;
                   return;
                 }
-                return loadButtons();
+                loadButtons();
               });
               scope.$watch('index', function() {
                 if (onInit.index) {
@@ -96,7 +104,7 @@
                   index: scope.index,
                   limit: scope.limit
                 });
-                return loadButtons();
+                loadButtons();
               });
               scope.$watch('limit', function() {
                 if (onInit.limit) {
@@ -111,18 +119,12 @@
                 } else {
                   scope.index = 0;
                 }
-                return loadButtons();
+                loadButtons();
               });
               scope.page({
                 index: scope.index,
                 limit: scope.limit
               });
-              return scope.process = function(index) {
-                if (scope.index === index || index < 0 || index >= scope.list.length) {
-                  return;
-                }
-                return scope.index = index;
-              };
             }
           };
         }
