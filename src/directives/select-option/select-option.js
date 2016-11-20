@@ -16,7 +16,7 @@
         compile: function(cElement, cAttributes, transclude) {
           return {
             pre: function(scope, elm, attrs) {
-              return scope.expression = attrs.swOptions;
+              scope.expression = attrs.swOptions;
             },
             post: function(scope, elm, attrs) {}
           };
