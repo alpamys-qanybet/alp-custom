@@ -9,6 +9,7 @@ angular.module('alpCustom').service 'hierarchialTreeService', [()->
 			component: null
 			fn: null
 			list: []
+		return
 
 	return this
 ]
@@ -16,7 +17,8 @@ angular.module('alpCustom').service 'hierarchialTreeService', [()->
 angular.module('alpCustom').directive "hierarchialTree", ['hierarchialTreeService', 'LIB_URL', (hierarchialTreeService, LIB_URL)->
 	restrict: "E"
 	replace: true
-	template: "<ul class='tree'><hierarchial-tree-node ng-repeat='c in list' item='c' uid='{{passUidToMember}}' content='{{content}}' depth='{{depth}}'></hierarchial-tree-node></ul>"
+	templateUrl: (elm, attrs)->
+		attrs.templateUrl or LIB_URL + 'directives/hierarchial-tree/hierarchial-tree.html'
 	scope:
 		id: '='
 		fetch: '&'
@@ -28,12 +30,10 @@ angular.module('alpCustom').directive "hierarchialTree", ['hierarchialTreeServic
 	]
 	
 	link: (scope, elm, attrs)->
-		console.log LIB_URL
-
 		if not scope.depth
 			scope.depth = 0
 
-		scope.content = attrs.content
+		scope.templateUrl = attrs.templateUrl
 		name = ''
 
 		if scope.uid
@@ -45,14 +45,17 @@ angular.module('alpCustom').directive "hierarchialTree", ['hierarchialTreeServic
 				hierarchialTreeService.map[name].fn = (fn, id)->
 					if id
 						scope.fetch({id: id, fn: fn})
+						return
 					else
 						scope.fetch({id: null, fn: fn})
+						return
 
 				scope.$watch ->
 					hierarchialTreeService.map[name].component
 				,
 					(newvalue, oldvalue)->
 						scope.component = newvalue
+						return
 				,
 					true
 		
@@ -61,11 +64,15 @@ angular.module('alpCustom').directive "hierarchialTree", ['hierarchialTreeServic
 		fetch = (fn, id)->
 			if id
 				hierarchialTreeService.map[name].fn (data)->
-					fn data
+					fn angular.copy data
+					return
 				, id
+				return
 			else # root
 				hierarchialTreeService.map[name].fn (data)->
-					fn data
+					fn angular.copy data
+					return
+				return
 
 		if scope.id
 			fetch (data)->
@@ -73,16 +80,20 @@ angular.module('alpCustom').directive "hierarchialTree", ['hierarchialTreeServic
 				hierarchialTreeService.map[name].list = hierarchialTreeService.map[name].list.concat scope.list
 				return
 			, scope.id
+			return
 		else
 			fetch (data)->
 				scope.list = data
 				hierarchialTreeService.map[name].list = hierarchialTreeService.map[name].list.concat scope.list
 				return
+			return
 ]
 
-angular.module('alpCustom').directive "hierarchialTreeNode", ['$templateRequest', '$sce', '$compile', 'hierarchialTreeService', ($templateRequest, $sce, $compile, hierarchialTreeService)->
+angular.module('alpCustom').directive "hierarchialTreeNode", ['$templateRequest', '$sce', '$compile', 'hierarchialTreeService', 'LIB_URL', ($templateRequest, $sce, $compile, hierarchialTreeService, LIB_URL)->
 	restrict: "E"
 	replace: true
+	templateUrl: (elm, attrs)->
+		attrs.nodeTemplateUrl or LIB_URL + 'directives/hierarchial-tree/hierarchial-tree-node.html'
 	scope:
 		item: '='
 		uid: '@'
@@ -98,45 +109,43 @@ angular.module('alpCustom').directive "hierarchialTreeNode", ['$templateRequest'
 			scope.item.selected = true
 			
 			hierarchialTreeService.map[scope.uid].component = angular.copy scope.item
-
-		indented = "style='position: relative; left: "+px+"px'"
-		
-		templateBegin = "<li ng-click='select()' ng-animate='tree-animate' class='tree-node' ng-class='{active: item.selected}'>"
-		templateBegin += 	"<a>"
-		templateBegin += 		"<i ng-show='!item.hasChildren' class='glyphicon glyphicon-file' "+indented+"></i>"
-		templateBegin += 		"<i ng-show='item.hasChildren && !item.loaded' ng-click='load()' class='glyphicon glyphicon-plus' "+indented+"></i>"
-		templateBegin += 		"<i ng-show='item.loaded && !item.open' ng-click='expand()' class='glyphicon glyphicon-plus' "+indented+"></i>"
-		templateBegin += 		"<i ng-show='item.loaded && item.open' ng-click='collapse()' class='glyphicon glyphicon-minus' "+indented+"></i>"
-		templateBegin += 		"<span class='tree-label' "+indented+">"
-		
-		templateEnd = "</span></a></li>"
-
-		templateUrl = $sce.getTrustedResourceUrl(attrs.content)
-		$templateRequest(templateUrl).then (t)->
-			template = templateBegin + t + templateEnd
-			elm.html(template).show()
-			$compile(elm.contents())(scope)
 			return
-		, ->
-			console.log 'error'
-			template = templateBegin + "{{item}}" + templateEnd
-			# template = '<h1>Error, template ' + attrs.content + ' failed to load!</h1>' + template
-			elm.html(template).show()
-			$compile(elm.contents())(scope)
-			return
+
+		scope.item.indented = 
+			position: 'relative'
+			left: px + 'px'
 		
 		scope.load = ->
 			nextDepth = Number(attrs.depth) + 1
 			if scope.item.hasChildren
 				scope.item.loaded = true
 				scope.item.open = true
-				elm.append('<hierarchial-tree id="item.id" uid="{{uid}}" ng-show="item.open" content="'+attrs.content+'" depth={{'+nextDepth+'}}></hierarchial-tree>')
-				$compile(elm.contents())(scope)
+				
+				# tt = '<hierarchial-tree id="item.id" uid="{{uid}}" ng-show="item.open" depth="{{'+nextDepth+'}}"'
+				# if attrs.templateUrl
+				# 	tt += ' template-url="'+attrs.templateUrl+'"'
+				# tt += '></hierarchial-tree>'
+
+				# elm.append(tt)
+				# $compile(elm.contents())(scope)
+				el = angular.element('<span/>')
+				# el.append('<input type="text" ng-model="input.value"/><button ng-if="input.value" ng-click="input.value=\'\'; doSomething()">X</button>')
+				tt = '<hierarchial-tree id="item.id" uid="{{uid}}" ng-show="item.open" depth="{{'+nextDepth+'}}"'
+				if attrs.templateUrl
+					tt += ' template-url="'+attrs.templateUrl+'"'
+				tt += '></hierarchial-tree>'
+
+				el.append(tt)
+				$compile(el)(scope)
+				elm.append(el)
 				return
 
 		scope.expand = ->
 			scope.item.open = true
+			return
 	
 		scope.collapse = ->
 			scope.item.open = false
+			return
+		return
 ]

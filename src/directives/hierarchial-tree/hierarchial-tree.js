@@ -8,7 +8,7 @@
         return this.map.indexOf(name) !== -1;
       };
       this.put = function(name) {
-        return this.map[name] = {
+        this.map[name] = {
           component: null,
           fn: null,
           list: []
@@ -23,7 +23,9 @@
       return {
         restrict: "E",
         replace: true,
-        template: "<ul class='tree'><hierarchial-tree-node ng-repeat='c in list' item='c' uid='{{passUidToMember}}' content='{{content}}' depth='{{depth}}'></hierarchial-tree-node></ul>",
+        templateUrl: function(elm, attrs) {
+          return attrs.templateUrl || LIB_URL + 'directives/hierarchial-tree/hierarchial-tree.html';
+        },
         scope: {
           id: '=',
           fetch: '&',
@@ -34,11 +36,10 @@
         controller: ["$scope", "$element", function($scope, $element) {}],
         link: function(scope, elm, attrs) {
           var fetch, name;
-          console.log(LIB_URL);
           if (!scope.depth) {
             scope.depth = 0;
           }
-          scope.content = attrs.content;
+          scope.templateUrl = attrs.templateUrl;
           name = '';
           if (scope.uid) {
             name = scope.uid;
@@ -48,12 +49,12 @@
               hierarchialTreeService.put(name);
               hierarchialTreeService.map[name].fn = function(fn, id) {
                 if (id) {
-                  return scope.fetch({
+                  scope.fetch({
                     id: id,
                     fn: fn
                   });
                 } else {
-                  return scope.fetch({
+                  scope.fetch({
                     id: null,
                     fn: fn
                   });
@@ -62,29 +63,29 @@
               scope.$watch(function() {
                 return hierarchialTreeService.map[name].component;
               }, function(newvalue, oldvalue) {
-                return scope.component = newvalue;
+                scope.component = newvalue;
               }, true);
             }
           }
           scope.passUidToMember = name;
           fetch = function(fn, id) {
             if (id) {
-              return hierarchialTreeService.map[name].fn(function(data) {
-                return fn(data);
+              hierarchialTreeService.map[name].fn(function(data) {
+                fn(angular.copy(data));
               }, id);
             } else {
-              return hierarchialTreeService.map[name].fn(function(data) {
-                return fn(data);
+              hierarchialTreeService.map[name].fn(function(data) {
+                fn(angular.copy(data));
               });
             }
           };
           if (scope.id) {
-            return fetch(function(data) {
+            fetch(function(data) {
               scope.list = data;
               hierarchialTreeService.map[name].list = hierarchialTreeService.map[name].list.concat(scope.list);
             }, scope.id);
           } else {
-            return fetch(function(data) {
+            fetch(function(data) {
               scope.list = data;
               hierarchialTreeService.map[name].list = hierarchialTreeService.map[name].list.concat(scope.list);
             });
@@ -95,17 +96,20 @@
   ]);
 
   angular.module('alpCustom').directive("hierarchialTreeNode", [
-    '$templateRequest', '$sce', '$compile', 'hierarchialTreeService', function($templateRequest, $sce, $compile, hierarchialTreeService) {
+    '$templateRequest', '$sce', '$compile', 'hierarchialTreeService', 'LIB_URL', function($templateRequest, $sce, $compile, hierarchialTreeService, LIB_URL) {
       return {
         restrict: "E",
         replace: true,
+        templateUrl: function(elm, attrs) {
+          return attrs.nodeTemplateUrl || LIB_URL + 'directives/hierarchial-tree/hierarchial-tree-node.html';
+        },
         scope: {
           item: '=',
           uid: '@'
         },
         controller: ["$scope", "$element", function($scope, $element) {}],
         link: function(scope, elm, attrs) {
-          var indented, px, templateBegin, templateEnd, templateUrl;
+          var px;
           px = 20 * Number(attrs.depth);
           scope.select = function() {
             var i, _i, _len, _ref;
@@ -115,45 +119,34 @@
               i.selected = false;
             }
             scope.item.selected = true;
-            return hierarchialTreeService.map[scope.uid].component = angular.copy(scope.item);
+            hierarchialTreeService.map[scope.uid].component = angular.copy(scope.item);
           };
-          indented = "style='position: relative; left: " + px + "px'";
-          templateBegin = "<li ng-click='select()' ng-animate='tree-animate' class='tree-node' ng-class='{active: item.selected}'>";
-          templateBegin += "<a>";
-          templateBegin += "<i ng-show='!item.hasChildren' class='glyphicon glyphicon-file' " + indented + "></i>";
-          templateBegin += "<i ng-show='item.hasChildren && !item.loaded' ng-click='load()' class='glyphicon glyphicon-plus' " + indented + "></i>";
-          templateBegin += "<i ng-show='item.loaded && !item.open' ng-click='expand()' class='glyphicon glyphicon-plus' " + indented + "></i>";
-          templateBegin += "<i ng-show='item.loaded && item.open' ng-click='collapse()' class='glyphicon glyphicon-minus' " + indented + "></i>";
-          templateBegin += "<span class='tree-label' " + indented + ">";
-          templateEnd = "</span></a></li>";
-          templateUrl = $sce.getTrustedResourceUrl(attrs.content);
-          $templateRequest(templateUrl).then(function(t) {
-            var template;
-            template = templateBegin + t + templateEnd;
-            elm.html(template).show();
-            $compile(elm.contents())(scope);
-          }, function() {
-            var template;
-            console.log('error');
-            template = templateBegin + "{{item}}" + templateEnd;
-            elm.html(template).show();
-            $compile(elm.contents())(scope);
-          });
+          scope.item.indented = {
+            position: 'relative',
+            left: px + 'px'
+          };
           scope.load = function() {
-            var nextDepth;
+            var el, nextDepth, tt;
             nextDepth = Number(attrs.depth) + 1;
             if (scope.item.hasChildren) {
               scope.item.loaded = true;
               scope.item.open = true;
-              elm.append('<hierarchial-tree id="item.id" uid="{{uid}}" ng-show="item.open" content="' + attrs.content + '" depth={{' + nextDepth + '}}></hierarchial-tree>');
-              $compile(elm.contents())(scope);
+              el = angular.element('<span/>');
+              tt = '<hierarchial-tree id="item.id" uid="{{uid}}" ng-show="item.open" depth="{{' + nextDepth + '}}"';
+              if (attrs.templateUrl) {
+                tt += ' template-url="' + attrs.templateUrl + '"';
+              }
+              tt += '></hierarchial-tree>';
+              el.append(tt);
+              $compile(el)(scope);
+              elm.append(el);
             }
           };
           scope.expand = function() {
-            return scope.item.open = true;
+            scope.item.open = true;
           };
-          return scope.collapse = function() {
-            return scope.item.open = false;
+          scope.collapse = function() {
+            scope.item.open = false;
           };
         }
       };
