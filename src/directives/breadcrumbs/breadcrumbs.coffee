@@ -2,11 +2,14 @@ angular.module('alpCustom').directive "breadcrumbs", ['LIB_URL', (LIB_URL)->
 	restrict: "E"
 	replace: true
 	templateUrl: (elm, attrs)->
-		attrs.templateUrl or LIB_URL + 'directives/breadcrumbs/breadcrumbs.html'
+		if attrs.template
+			LIB_URL + 'directives/breadcrumbs/breadcrumbs-'+attrs.template+'.html'
+		else
+			attrs.templateUrl or LIB_URL + 'directives/breadcrumbs/breadcrumbs.html'
 	scope:
-		'fetch': '&'
-		'list': '='
-	
+		fetch: '&'
+		list: '='
+
 	controller: ["$scope", "$element", ($scope, $element)->
 		init = ->
 			$scope.list = []
@@ -19,7 +22,7 @@ angular.module('alpCustom').directive "breadcrumbs", ['LIB_URL', (LIB_URL)->
 
 		init()
 
-		$scope.process = (id)->
+		$scope.process = (id)->	
 			if id == 'root'
 				init()
 				$scope.fetch()
@@ -37,4 +40,49 @@ angular.module('alpCustom').directive "breadcrumbs", ['LIB_URL', (LIB_URL)->
 
 		return
 	]
+	
+	link: (scope, elm, attrs)->
+		if attrs.contentUrl
+			scope.contentUrl = attrs.contentUrl
+		return
+]
+
+angular.module('alpCustom').directive "breadcrumbsItem", ['$templateRequest', '$sce', '$compile', 'LIB_URL', ($templateRequest, $sce, $compile, LIB_URL)->
+	restrict: "E"
+	replace: true
+	templateUrl: (elm, attrs)->
+		if attrs.template
+			LIB_URL + 'directives/breadcrumbs/breadcrumbs-item-'+attrs.template+'.html'
+		else
+			attrs.itemTemplateUrl or LIB_URL + 'directives/breadcrumbs/breadcrumbs-item.html'
+	scope:
+		item: '='
+	controller: ["$scope", "$element", (scope, elm)->
+	]
+
+	compile: (cElement, cAttributes, transclude)->
+		pre: (scope, elm, attrs)->
+			replace = (selector, content)->
+				domElement = elm.find(selector).clone()
+				domElement.html content
+				domElement = $compile(domElement)(scope)
+				elm.find(selector).replaceWith domElement
+				return
+
+			if attrs.contentUrl
+				url = $sce.getTrustedResourceUrl attrs.contentUrl
+				$templateRequest(url).then (t)->
+					replace '.item-content', t
+					return
+				, ->
+					console.error 'content url not found'
+					replace '.item-content', '{{item}}'
+					return
+				return
+			else
+				replace '.item-content', '{{item}}'
+				return
+		,
+		post: (scope, elm, attrs)->
+			return
 ]

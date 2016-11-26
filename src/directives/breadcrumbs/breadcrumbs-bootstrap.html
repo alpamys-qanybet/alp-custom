@@ -1,0 +1,9 @@
+<ul class="breadcrumb" ng-show="list.length > 1">
+	<breadcrumbs-item
+		ng-repeat="c in list track by $index"
+		ng-class="{active: $last}"
+		item="c"
+		content-url='{{contentUrl}}'
+		template='bootstrap'>
+	</breadcrumbs-item>
+</ul>

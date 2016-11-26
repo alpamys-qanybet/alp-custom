@@ -7,11 +7,15 @@
         restrict: "E",
         replace: true,
         templateUrl: function(elm, attrs) {
-          return attrs.templateUrl || LIB_URL + 'directives/breadcrumbs/breadcrumbs.html';
+          if (attrs.template) {
+            return LIB_URL + 'directives/breadcrumbs/breadcrumbs-' + attrs.template + '.html';
+          } else {
+            return attrs.templateUrl || LIB_URL + 'directives/breadcrumbs/breadcrumbs.html';
+          }
         },
         scope: {
-          'fetch': '&',
-          'list': '='
+          fetch: '&',
+          list: '='
         },
         controller: [
           "$scope", "$element", function($scope, $element) {
@@ -48,7 +52,58 @@
               }
             };
           }
-        ]
+        ],
+        link: function(scope, elm, attrs) {
+          if (attrs.contentUrl) {
+            scope.contentUrl = attrs.contentUrl;
+          }
+        }
+      };
+    }
+  ]);
+
+  angular.module('alpCustom').directive("breadcrumbsItem", [
+    '$templateRequest', '$sce', '$compile', 'LIB_URL', function($templateRequest, $sce, $compile, LIB_URL) {
+      return {
+        restrict: "E",
+        replace: true,
+        templateUrl: function(elm, attrs) {
+          if (attrs.template) {
+            return LIB_URL + 'directives/breadcrumbs/breadcrumbs-item-' + attrs.template + '.html';
+          } else {
+            return attrs.itemTemplateUrl || LIB_URL + 'directives/breadcrumbs/breadcrumbs-item.html';
+          }
+        },
+        scope: {
+          item: '='
+        },
+        controller: ["$scope", "$element", function(scope, elm) {}],
+        compile: function(cElement, cAttributes, transclude) {
+          return {
+            pre: function(scope, elm, attrs) {
+              var replace, url;
+              replace = function(selector, content) {
+                var domElement;
+                domElement = elm.find(selector).clone();
+                domElement.html(content);
+                domElement = $compile(domElement)(scope);
+                elm.find(selector).replaceWith(domElement);
+              };
+              if (attrs.contentUrl) {
+                url = $sce.getTrustedResourceUrl(attrs.contentUrl);
+                $templateRequest(url).then(function(t) {
+                  replace('.item-content', t);
+                }, function() {
+                  console.error('content url not found');
+                  replace('.item-content', '{{item}}');
+                });
+              } else {
+                replace('.item-content', '{{item}}');
+              }
+            },
+            post: function(scope, elm, attrs) {}
+          };
+        }
       };
     }
   ]);
