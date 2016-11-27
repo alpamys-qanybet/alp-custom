@@ -9,15 +9,21 @@ angular.module('alpCustom').directive "breadcrumbs", ['LIB_URL', (LIB_URL)->
 	scope:
 		fetch: '&'
 		list: '='
+		root: '='
 
 	controller: ["$scope", "$element", ($scope, $element)->
 		init = ->
 			$scope.list = []
-			root = 
-				id: 'root'
-				name: 'Main'
+			
+			if $scope.root
+				$scope.root.id = 'root'
+				$scope.list.push $scope.root
+			else
+				root = 
+					id: 'root'
+					name: 'Main'
 				
-			$scope.list.push root
+				$scope.list.push root
 			return
 
 		init()

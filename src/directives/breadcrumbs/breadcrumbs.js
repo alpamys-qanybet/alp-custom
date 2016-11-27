@@ -15,7 +15,8 @@
         },
         scope: {
           fetch: '&',
-          list: '='
+          list: '=',
+          root: '='
         },
         controller: [
           "$scope", "$element", function($scope, $element) {
@@ -23,11 +24,16 @@
             init = function() {
               var root;
               $scope.list = [];
-              root = {
-                id: 'root',
-                name: 'Main'
-              };
-              $scope.list.push(root);
+              if ($scope.root) {
+                $scope.root.id = 'root';
+                $scope.list.push($scope.root);
+              } else {
+                root = {
+                  id: 'root',
+                  name: 'Main'
+                };
+                $scope.list.push(root);
+              }
             };
             init();
             $scope.process = function(id) {
