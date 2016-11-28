@@ -15,7 +15,7 @@ angular.module('yourApp', [... , 'alpCustom'])
 ```
 
 ###Demo and Usage
-* [https://alpamys-qanybet.github.io/link/hierarchial-tree/](hierarchial-tree)
-* [https://alpamys-qanybet.github.io/link/hierarchial-dictionary/](hierarchial-dictionary)
-* [https://alpamys-qanybet.github.io/link/breadcrumbs/](breadcrumbs)
-* [https://alpamys-qanybet.github.io/link/paginate/](paginate)
+* [hierarchial-tree](https://alpamys-qanybet.github.io/link/hierarchial-tree/)
+* [hierarchial-dictionary](https://alpamys-qanybet.github.io/link/hierarchial-dictionary/)
+* [breadcrumbs](https://alpamys-qanybet.github.io/link/breadcrumbs/)
+* [paginate](https://alpamys-qanybet.github.io/link/paginate/)
