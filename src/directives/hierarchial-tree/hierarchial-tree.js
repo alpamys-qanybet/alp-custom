@@ -133,13 +133,13 @@
               if (attrs.contentUrl) {
                 url = $sce.getTrustedResourceUrl(attrs.contentUrl);
                 $templateRequest(url).then(function(t) {
-                  replace('#item-content', t);
+                  replace('.item-content', t);
                 }, function() {
                   console.error('content url not found');
-                  replace('#item-content', '{{item}}');
+                  replace('.item-content', '{{item}}');
                 });
               } else {
-                replace('#item-content', '{{item}}');
+                replace('.item-content', '{{item}}');
               }
             },
             post: function(scope, elm, attrs) {

@@ -123,15 +123,15 @@ angular.module('alpCustom').directive "hierarchialTreeNode", ['$templateRequest'
 			if attrs.contentUrl
 				url = $sce.getTrustedResourceUrl attrs.contentUrl
 				$templateRequest(url).then (t)->
-					replace '#item-content', t
+					replace '.item-content', t
 					return
 				, ->
 					console.error 'content url not found'
-					replace '#item-content', '{{item}}'
+					replace '.item-content', '{{item}}'
 					return
 				return
 			else
-				replace '#item-content', '{{item}}'
+				replace '.item-content', '{{item}}'
 				return
 		,
 		post: (scope, elm, attrs)->
